@@ -14,7 +14,7 @@ All functions and types are importable directly from `matplotobjlib`. The easies
     ys = np.sin(xs)
     draw(SubPlot(Graph(xs, ys, plot_type="-"), x_label="x", y_label="sin(x)"), title="sin")
 
-image
+<img src="https://raw.githubusercontent.com/larashores/matplotobjlib/master/images/sin.png" title=examples/sin.py width="600">
 
     # examples/trig.py
 
@@ -36,6 +36,8 @@ image
         title="Trigonometry",
     )
 
+<img src="https://raw.githubusercontent.com/larashores/matplotobjlib/master/images/trig.png" title=examples/trig.py width="600">
+
 Additionally, for more control over the window, it can be accessed as a tkinter widget through `TkFigure`. The `draw(...)` function even uses this internally.
 
     # examples/widget.py
@@ -54,3 +56,6 @@ Additionally, for more control over the window, it can be accessed as a tkinter 
     )
     widget.pack(expand=tk.YES, fill=tk.BOTH)
     root.mainloop()
+
+
+<img src="https://raw.githubusercontent.com/larashores/matplotobjlib/master/images/widget.png" title=examples/widget.py width="600">
