@@ -24,7 +24,7 @@ def pypy(token: Optional[str]):
     try:
         for command in (
             "python setup.py sdist",
-            "python setup.py bdist_wheel --python-tag py38",
+            "python setup.py bdist_wheel",
             "twine check dist/*",
             upload_command,
         ):

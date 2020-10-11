@@ -11,7 +11,7 @@ setup(
     packages=["matplotobjlib"],
     package_dir={"": "src"},
     python_requires=">=3.4",
-    version="1.0",
+    version="0.9.0",
     author="Lara Shores",
     author_email="lara.shores@outlook.com",
     url="https://github.com/larashores",
@@ -19,15 +19,14 @@ setup(
     long_description=README,
     long_description_content_type="text/markdown",
     classifiers=[
-        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Topic :: Software Development"
+        "Topic :: Scientific/Engineering",
     ],
     install_requires=[
         "matplotlib",
         "pycertainties ==1.*, >=1.0.2",
         "sympy",
-
     ]
 )
