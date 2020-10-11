@@ -3,19 +3,20 @@ Provides facilities for graphing in matplotlib. See draw_graph for the main draw
 """
 import tkinter as tk
 from tkinter import ttk
+from typing import Optional, Sequence, Union
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvas
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 from matplotlib.figure import Figure
 
-from matplotobjlib.suplot import SubPlot
+from matplotobjlib.subplot import SubPlot
 
 
 class TkFigure(ttk.Frame):
     DEFAULT_FONT_SIZE = 23
     DEFAULT_TITLE_SIZE = 25
 
-    def __init__(self, root, subplots, title=""):
+    def __init__(self, root: tk.Widget, subplots: Sequence[Sequence[SubPlot]], title: str = ""):
         ttk.Frame.__init__(self, root)
         self._fig = Figure()
         self._subplots = []
@@ -37,16 +38,18 @@ class TkFigure(ttk.Frame):
         self._fig.suptitle(title, fontweight="bold", fontsize=self.DEFAULT_TITLE_SIZE)
         self._fig.subplots_adjust(hspace=0.6, wspace=0.3)
 
-    def draw(self):
+        self.draw()
+
+    def draw(self) -> None:
         for subplot in self._subplots:
             subplot.draw()
 
-    def update_plot(self):
+    def update_plot(self) -> None:
         self._canvas.draw()
         self._canvas.flush_events()
 
 
-def draw(subplots, title=""):
+def draw(subplots: Union[SubPlot, Sequence[Sequence[SubPlot]]], title: Optional[str] = None) -> None:
     """
     Draws subplots on a new Tk root window and runs mainloop until it's closed
 
@@ -55,12 +58,11 @@ def draw(subplots, title=""):
             need to be drawn
         title: The title for the tk window and for the plot
     """
-    if type(subplots) == SubPlot:
+    if isinstance(subplots, SubPlot):
         subplots = [[subplots]]
     root = tk.Tk()
-    root.title(title if title else "Plot")
+    root.title("Plot" if title is None else title)
     root.geometry("1050x700")
     figure = TkFigure(root, subplots, title)
-    figure.draw()
     figure.pack(expand=tk.YES, fill=tk.BOTH)
     root.mainloop()

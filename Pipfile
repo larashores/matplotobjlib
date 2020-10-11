@@ -3,15 +3,17 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
+[packages]
+matplotobjlib = {editable = true, path = "."}
+
 [dev-packages]
+black = "*"
 mypy = "*"
 pylint = "*"
 pytest = "*"
-black = "*"
-
-[packages]
-matplotlib = "*"
-scipy = "*"
+setuptools = "*"
+twine = "*"
+wheel = "*"
 
 [requires]
 python_version = "3.8"

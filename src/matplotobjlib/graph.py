@@ -1,8 +1,14 @@
 import collections
+from typing import Optional, Sequence
 
 import numpy as np
+from matplotlib.artist import Artist
+from matplotlib.axes._axes import Axes
+from pycertainties import uncertainty_str
 
-from matplotobjlib.utilities import fit_func, uncertainty_str
+from matplotobjlib.plotable import Plotable
+from matplotobjlib.type_hints import Color, Value
+from matplotobjlib.utilities import fit_func
 
 
 def _make_fit_string(fit_string, values, dvalues):
@@ -12,38 +18,40 @@ def _make_fit_string(fit_string, values, dvalues):
     return fit_string.format(*strings)
 
 
-class Graph:
+class Graph(Plotable):
     """
     Provides values that should be plotted on a subplot. Optionally a linear regression can be calculated for the data
 
     Attributes:
-        x_values: A sequence of values to be plotted on the x axis. Should have the same length as y_values
-        y_values: A sequence of values to be plotted on the y axis. Should have the same length as x_values
+        x_values: A sequence of values to be plotted on the x axes. Should have the same length as y_values
+        y_values: A sequence of values to be plotted on the y axes. Should have the same length as x_values
         regression: If this is true this will draw a linear regression for the plot
         legend_label: If a string is provided the graph will be included in the subplot legend
 
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(
         self,
-        x_values,
-        y_values,
+        x_values: Sequence[Value],
+        y_values: Sequence[Value],
         *,
-        x_errors=None,
-        y_errors=None,
+        x_errors: Optional[Sequence[Value]] = None,
+        y_errors: Optional[Sequence[Value]] = None,
         curve_fits=None,
-        legend_label=None,
-        color=None,
-        plot_type="o",
-        plot_size=13,
-        line_width=1,
+        legend_label: Optional[str] = None,
+        color: Optional[Color] = None,
+        plot_type: str = "o",
+        plot_size: int = 13,
+        line_width: int = 1,
     ):
         """
         Creates a new GraphSettings object
 
         Args:
-            x_values: A sequence of values to be plotted on the x axis. Should have the same length as y_values
-            y_values: A sequence of values to be plotted on the y axis. Should have the same length as x_values
+            x_values: A sequence of values to be plotted on the x axes. Should have the same length as y_values
+            y_values: A sequence of values to be plotted on the y axes. Should have the same length as x_values
             regression: If this is true this will draw a linear regression for the plot
             legend_label: If a string is provided the graph will be included in the subplot legend
         """
@@ -60,9 +68,10 @@ class Graph:
         self.plot_size = plot_size
         self.line_width = line_width
 
-    def draw(self, axis, x_log=False, y_log=False):
+    def draw(self, axes: Axes, x_log: bool = False, y_log: bool = False) -> Artist:
+        # pylint: disable=too-many-locals
         if self.x_error is not None or self.y_error is not None:
-            line = axis.errorbar(
+            line = axes.errorbar(
                 self.x_values,
                 self.y_values,
                 self.y_error,
@@ -73,7 +82,7 @@ class Graph:
                 linewidth=self.line_width,
             )[0]
         else:
-            line = axis.plot(
+            line = axes.plot(
                 self.x_values,
                 self.y_values,
                 self.plot_type,
@@ -101,8 +110,8 @@ class Graph:
                 ys = fit.func(xs, *optimal)
                 if y_log:
                     ys = np.e ** ys
-                regression = axis.plot(original_xs, ys)[0]
-                regression.set_color(line._color)
+                regression = axes.plot(original_xs, ys)[0]
+                regression.set_color(line._color)  # pylint: disable=protected-access
                 if fit.string:
                     name = " for " + self.legend_label if self.legend_label is not None else ""
                     print(f"Best-fit{name}: {_make_fit_string(fit.string, optimal, stddev)}")

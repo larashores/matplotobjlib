@@ -1,8 +1,15 @@
+from typing import Optional
+
 import numpy as np
+from matplotlib.artist import Artist
+from matplotlib.axes._axes import Axes
+
+from matplotobjlib.plotable import Plotable
+from matplotobjlib.type_hints import Range, Value
 
 
-class Histogram:
-    def __init__(self, values, binwidth=None, num_bins=None):
+class Histogram(Plotable):
+    def __init__(self, values: Value, binwidth: Optional[Range] = None, num_bins: Optional[int] = None):
         if binwidth is not None:
             self.bins = np.arange(min(values), max(values) + binwidth, binwidth)
         elif num_bins is not None:
@@ -11,8 +18,8 @@ class Histogram:
             self.bins = None
         self.values = values
 
-    def draw(self, axis, _x_log, _y_log):
+    def draw(self, axes: Axes, x_log: bool, y_log: bool) -> Artist:
         if self.bins is not None:
-            return axis.hist(self.values, bins=self.bins)
+            return axes.hist(self.values, bins=self.bins)
         else:
-            return axis.hist(self.values)
+            return axes.hist(self.values)
