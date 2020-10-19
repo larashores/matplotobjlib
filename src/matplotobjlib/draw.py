@@ -1,6 +1,7 @@
 """
 Provides facilities for graphing in matplotlib. See draw_graph for the main drawing function
 """
+import dataclasses
 import tkinter as tk
 from tkinter import ttk
 from typing import Optional, Sequence, Union
@@ -12,12 +13,29 @@ from matplotlib.figure import Figure
 from matplotobjlib.subplot import SubPlot
 
 
+@dataclasses.dataclass
+class SubplotsAdjust:
+    left: Optional[float] = None
+    bottom: Optional[float] = None
+    right: Optional[float] = None
+    top: Optional[float] = None
+    wspace: Optional[float] = None
+    hspace: Optional[float] = None
+
+
 class TkFigure(ttk.Frame):
     DEFAULT_FONT_SIZE = 23
     DEFAULT_TITLE_SIZE = 25
 
-    def __init__(self, root: tk.Widget, subplots: Sequence[Sequence[SubPlot]], title: str = ""):
-        ttk.Frame.__init__(self, root)
+    def __init__(
+        self,
+        parent: tk.Widget,
+        subplots: Sequence[Sequence[SubPlot]],
+        title: str = "",
+        *,
+        adjust: SubplotsAdjust = SubplotsAdjust(hspace=0.6, wspace=0.3)
+    ):
+        ttk.Frame.__init__(self, parent)
         self._fig = Figure()
         self._subplots = []
         self._canvas = FigureCanvas(self._fig, self)
@@ -36,7 +54,7 @@ class TkFigure(ttk.Frame):
                     subplot.set_axis(ax)
                     self._subplots.append(subplot)
         self._fig.suptitle(title, fontweight="bold", fontsize=self.DEFAULT_TITLE_SIZE)
-        self._fig.subplots_adjust(hspace=0.6, wspace=0.3)
+        self._fig.subplots_adjust(**dataclasses.asdict(adjust))
 
         self.draw()
 
