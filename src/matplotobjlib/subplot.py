@@ -1,5 +1,6 @@
+import dataclasses
 import enum
-from typing import Optional, Tuple
+from typing import Iterable, Optional, Tuple, Union
 
 import numpy as np
 from matplotlib.artist import Artist
@@ -14,6 +15,37 @@ class LogType(enum.Enum):
     X = enum.auto()
     Y = enum.auto()
     Both = enum.auto()
+
+
+class Axis(enum.Enum):
+    X = "x"
+    Y = "y"
+
+
+@dataclasses.dataclass
+class TickOptions:
+    labels: Optional[Iterable[str]] = None
+    use_offset: Optional[bool] = None
+    values: Optional[Iterable[Value]] = None
+    size: Optional[int] = None
+    style: Optional[str] = None
+
+    def apply(self, axes: Axes, *, axis: Axis) -> None:
+        if self.labels is not None:
+            (axes.set_xticklabels if axis == axis.X else axes.set_yticklabels)(self.labels)
+        if self.values is not None:
+            (axes.set_xticks if axis == axis.X else axes.set_yticks)(self.values)
+        format_kwargs = {}
+        if self.style is not None:
+            format_kwargs["style"] = self.style
+        if self.use_offset is not None:
+            format_kwargs["useOffset"] = self.use_offset
+        if format_kwargs:
+            axes.ticklabel_format(axis=axis.value, **format_kwargs)
+        if self.size is not None:
+            ax = axes.xaxis if axis == Axis.X else axes.yaxis
+            for tick in ax.get_major_ticks():
+                tick.label.set_fontsize(self.size)
 
 
 class SubPlot:
@@ -37,12 +69,13 @@ class SubPlot:
         y_label: str = "",
         title: str = "",
         log: Optional[LogType] = None,
-        tick_size: Optional[int] = None,
         axis_label_size: int = 23,
         title_font_size: int = 23,
         legend_size: Optional[int] = None,
         x_range: Optional[Tuple[Optional[Value], Optional[Value]]] = None,
         y_range: Optional[Tuple[Optional[Value], Optional[Value]]] = None,
+        x_tick_options: TickOptions = TickOptions(use_offset=True),
+        y_tick_options: TickOptions = TickOptions(style="sci", use_offset=False),
     ):
         """
         Creates a new SubPlot object
@@ -59,26 +92,22 @@ class SubPlot:
         self.title = title
         self.x_log = log in (LogType.X, LogType.Both)
         self.y_log = log in (LogType.Y, LogType.Both)
-        self.tick_size = tick_size
         self.axis_label_size = axis_label_size
         self.title_size = title_font_size
         self.legend_size = legend_size
         self.x_range = x_range
         self.y_range = y_range
         self._axis = None
+        self._x_tick_options = x_tick_options
+        self._y_tick_options = y_tick_options
 
     def set_axis(self, ax: Axes) -> None:
         self._axis = ax
         ax.set_ylabel(self.y_label, fontsize=self.axis_label_size)
         ax.set_xlabel(self.x_label, fontsize=self.axis_label_size)
         ax.set_title(self.title, fontsize=self.title_size, fontweight="bold")
-        ax.ticklabel_format(axis="y", style="sci")
-        ax.ticklabel_format(useOffset=False)
-        if self.tick_size:
-            for tick in ax.xaxis.get_major_ticks():
-                tick.label.set_fontsize(self.tick_size)
-            for tick in ax.yaxis.get_major_ticks():
-                tick.label.set_fontsize(self.tick_size)
+        self._x_tick_options.apply(ax)
+        self._y_tick_options.apply(ax)
         if self.x_log:
             ax.set_xscale("log", basey=np.e)
             ax.grid(which="major")
