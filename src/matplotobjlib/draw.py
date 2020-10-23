@@ -23,6 +23,13 @@ class SubplotsAdjust:
     hspace: Optional[float] = None
 
 
+@dataclasses.dataclass
+class FigureOptions:
+    subplots: Sequence[Sequence[SubPlot]]
+    title: Optional[str] = None
+    adjust: SubplotsAdjust = SubplotsAdjust(hspace=0.6, wspace=0.3)
+
+
 class TkFigure(ttk.Frame):
     DEFAULT_FONT_SIZE = 23
     DEFAULT_TITLE_SIZE = 25
@@ -30,10 +37,7 @@ class TkFigure(ttk.Frame):
     def __init__(
         self,
         parent: tk.Widget,
-        subplots: Sequence[Sequence[SubPlot]],
-        title: str = "",
-        *,
-        adjust: SubplotsAdjust = SubplotsAdjust(hspace=0.6, wspace=0.3)
+        options: FigureOptions,
     ):
         ttk.Frame.__init__(self, parent)
         self._fig = Figure()
@@ -43,18 +47,18 @@ class TkFigure(ttk.Frame):
         toolbar = NavigationToolbar2Tk(self._canvas, self)
         toolbar.update()
 
-        num_rows = len(subplots)
-        num_columns = max(len(graphs) for graphs in subplots)
+        num_rows = len(options.subplots)
+        num_columns = max(len(graphs) for graphs in options.subplots)
         for i in range(num_rows):
             for j in range(num_columns):
-                subplot = subplots[i][j]
+                subplot = options.subplots[i][j]
                 if subplot is not None:
                     index = (i * num_columns) + j + 1
                     ax = self._fig.add_subplot(num_rows, num_columns, index)
                     subplot.set_axis(ax)
                     self._subplots.append(subplot)
-        self._fig.suptitle(title, fontweight="bold", fontsize=self.DEFAULT_TITLE_SIZE)
-        self._fig.subplots_adjust(**dataclasses.asdict(adjust))
+        self._fig.suptitle(options.title or "", fontweight="bold", fontsize=self.DEFAULT_TITLE_SIZE)
+        self._fig.subplots_adjust(**dataclasses.asdict(options.adjust))
 
         self.draw()
 
@@ -67,7 +71,7 @@ class TkFigure(ttk.Frame):
         self._canvas.flush_events()
 
 
-def draw(subplots: Union[SubPlot, Sequence[Sequence[SubPlot]]], title: Optional[str] = None) -> None:
+def draw(options: FigureOptions) -> None:
     """
     Draws subplots on a new Tk root window and runs mainloop until it's closed
 
@@ -79,8 +83,8 @@ def draw(subplots: Union[SubPlot, Sequence[Sequence[SubPlot]]], title: Optional[
     if isinstance(subplots, SubPlot):
         subplots = [[subplots]]
     root = tk.Tk()
-    root.title("Plot" if title is None else title)
+    root.title("Plot" if options.title is None else options.title)
     root.geometry("1050x700")
-    figure = TkFigure(root, subplots, title)
+    figure = TkFigure(root, options)
     figure.pack(expand=tk.YES, fill=tk.BOTH)
     root.mainloop()
