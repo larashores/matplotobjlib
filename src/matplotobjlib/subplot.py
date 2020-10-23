@@ -106,8 +106,8 @@ class SubPlot:
         ax.set_ylabel(self.y_label, fontsize=self.axis_label_size)
         ax.set_xlabel(self.x_label, fontsize=self.axis_label_size)
         ax.set_title(self.title, fontsize=self.title_size, fontweight="bold")
-        self._x_tick_options.apply(ax)
-        self._y_tick_options.apply(ax)
+        self._x_tick_options.apply(ax, axis=Axis.X)
+        self._y_tick_options.apply(ax, axis=Axis.Y)
         if self.x_log:
             ax.set_xscale("log", basey=np.e)
             ax.grid(which="major")
